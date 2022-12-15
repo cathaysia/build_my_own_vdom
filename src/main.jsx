@@ -13,6 +13,11 @@ function setBooleanProp($target, name, value) {
     }
 }
 
+function removeBooleanProp($target, name) {
+    $target.removeAttribute(name);
+    $target[name] = false
+}
+
 function isCustomProp(name) {
     return false;
 }
@@ -29,9 +34,36 @@ function setProp($target, name, value) {
     }
 }
 
+function removeProp($target, name, value) {
+    if (isCustomProp(name)) {
+        return;
+    } else if (name === 'className') {
+        $target.removeAttribute('class');
+    } else if (typeof value === 'boolean') {
+        removeBooleanProp($target, name);
+    } else {
+        $target.removeAttribute(name);
+    }
+}
+
 function setProps($target, props) {
     Object.keys(props).forEach(name => {
         setProp($target, name, props[name]);
+    })
+}
+
+function updateProp($target, name, newVal, oldVal) {
+    if (!newVal) {
+        removeProp($target, name, oldVal);
+    } else if (!oldVal || newVal != oldVal) {
+        setProp($target, name, newVal);
+    }
+}
+
+function updateProps($target, newProps, oldProps) {
+    const props = Object.assign({}, newProps, oldProps);
+    Object.keys(props).forEach(name => {
+        updateProp($target, name, newProps[name], oldProps[name]);
     })
 }
 
@@ -71,6 +103,12 @@ function updateElement($parent, newNode, oldNode, index = 0) {
             $parent.childNodes[index]
         )
     } else if (newNode.type) {
+        updateProps(
+            $parent.childNodes[index],
+            newNode.props,
+            oldNode.props
+        )
+
         const newLen = newNode.children.length;
         const oldLen = oldNode.children.length;
 
@@ -85,7 +123,7 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 }
 
 const a = (
-    <ul className="red">
+    <ul className="blue">
         <li>item 1</li>
         <li>item 2</li>
     </ul>
