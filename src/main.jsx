@@ -4,6 +4,25 @@ function h(type, props, ...children) {
     return { type, props: props || {}, children };
 }
 
+function isEventProp(name) {
+    return /^on/.test(name);
+}
+
+function extractEventName(name) {
+    return name.slice(2).toLowerCase();
+}
+
+function addEventListener($target, props) {
+    Object.keys(props).forEach(name => {
+        if (isEventProp(name)) {
+            $target.addEventListener(
+                extractEventName(name),
+                props[name]
+            )
+        }
+    })
+}
+
 function setBooleanProp($target, name, value) {
     if (value) {
         $target.setAttribute(name, value);
@@ -19,7 +38,7 @@ function removeBooleanProp($target, name) {
 }
 
 function isCustomProp(name) {
-    return false;
+    return isEventProp(name) || name === 'forceUpdate';
 }
 
 function setProp($target, name, value) {
@@ -74,6 +93,7 @@ function createElement(node) {
 
     const $el = document.createElement(node.type)
     setProps($el, node.props)
+    addEventListener($el, node.props)
 
     node.children
         .map(createElement)
@@ -85,7 +105,8 @@ function createElement(node) {
 function changed(node1, node2) {
     return typeof node1 !== typeof node2 ||
         typeof node1 === 'string' && node1 !== node2 ||
-        node1.type !== node2.type
+        node1.type !== node2.type ||
+        typeof node1 !== 'string' && node1.props.forceUpdate;
 }
 
 function updateElement($parent, newNode, oldNode, index = 0) {
@@ -124,15 +145,15 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 
 const a = (
     <ul className="blue">
-        <li>item 1</li>
-        <li>item 2</li>
+        <li forceUpdate={true}>item 1</li>
+        <li >item 2</li>
     </ul>
 )
 
 const b = (
     <ul className="red">
-        <li>item 1</li>
-        <li>hello !</li>
+        <li onClick={() => alert('hi!')}>item 1</li>
+        <li >hello !</li>
     </ul>
 )
 
