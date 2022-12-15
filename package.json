@@ -1,0 +1,11 @@
+{
+    "scripts": {
+        "build": "babel --plugins @babel/plugin-transform-react-jsx src/main.jsx -o build/release.js",
+        "run": "firefox src/index.html"
+    },
+    "dependencies": {
+        "@babel/cli": "^7.19.3",
+        "@babel/core": "^7.20.5",
+        "@babel/plugin-transform-react-jsx": "^7.19.0"
+    }
+}
