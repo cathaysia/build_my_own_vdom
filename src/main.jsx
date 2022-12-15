@@ -1,7 +1,38 @@
 /** @jsx h */
 
 function h(type, props, ...children) {
-    return { type, props, children };
+    return { type, props: props || {}, children };
+}
+
+function setBooleanProp($target, name, value) {
+    if (value) {
+        $target.setAttribute(name, value);
+        $target[name] = true;
+    } else {
+        $target[name] = false;
+    }
+}
+
+function isCustomProp(name) {
+    return false;
+}
+
+function setProp($target, name, value) {
+    if (isCustomProp(name)) {
+        return;
+    } else if (name == "className") {
+        $target.setAttribute('class', value);
+    } else if (typeof value === "boolean") {
+        setBooleanProp($target, name, value)
+    } else {
+        $target.setAttribute(name, value);
+    }
+}
+
+function setProps($target, props) {
+    Object.keys(props).forEach(name => {
+        setProp($target, name, props[name]);
+    })
 }
 
 function createElement(node) {
@@ -10,6 +41,7 @@ function createElement(node) {
     }
 
     const $el = document.createElement(node.type)
+    setProps($el, node.props)
 
     node.children
         .map(createElement)
@@ -53,14 +85,14 @@ function updateElement($parent, newNode, oldNode, index = 0) {
 }
 
 const a = (
-    <ul>
+    <ul className="red">
         <li>item 1</li>
         <li>item 2</li>
     </ul>
 )
 
 const b = (
-    <ul>
+    <ul className="red">
         <li>item 1</li>
         <li>hello !</li>
     </ul>
